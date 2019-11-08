@@ -1,0 +1,11 @@
+[Desktop Entry]
+Type=Application
+Name=ROS Robot Indicator
+Comment=Indicates Robot Status
+Exec=bash -i -c "source /opt/ros/\\`rosversion -d\\`/setup.bash && rosrun robot_indicator robot_indicator"
+Terminal=false
+OnlyShowIn=GNOME;Unity;MATE;
+X-GNOME-Autostart-enabled=true
+X-GNOME-Autostart-Phase=Running
+X-GNOME-AutoRestart=false
+X-GNOME-Autostart-Notify=true
