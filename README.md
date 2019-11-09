@@ -8,6 +8,9 @@ Systemd based control of roslaunch units.
 
 ![Indicator](https://raw.githubusercontent.com/LucidOne/robot_indicator/master/doc/indicator.png)
 
+![Launch Package Selection](https://raw.githubusercontent.com/LucidOne/robot_indicator/master/doc/launch_package.png)
+![Launch UI](https://raw.githubusercontent.com/LucidOne/robot_indicator/master/doc/launch_ui.png)
+
 ## TL;DR
 ```bash
 mkdir -p ~/.config/autostart
