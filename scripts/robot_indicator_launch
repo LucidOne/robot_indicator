@@ -112,7 +112,7 @@ class LaunchWindow(Gtk.Window):
         r = subprocess.run(shlex.split(cmd), stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         # TODO: Use notify to return error messages
         if r.returncode != 0:
-            print(cmd+'\n'+r.stdout+'\n'+r.stderr)
+            print(cmd+'\n'+r.stdout.decode()+'\n'+r.stderr.decode())
         Gtk.main_quit()
 
 class Launcher:

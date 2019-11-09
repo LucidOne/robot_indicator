@@ -183,7 +183,7 @@ class RobotIndicator:
         r = subprocess.run(shlex.split(cmd))
         # TODO: Use notify to return error messages
         if r.returncode != 0:
-            print(cmd+'\n'+r.stdout+'\n'+r.stderr)
+            print(cmd+'\n'+r.stdout.decode()+'\n'+r.stderr.decode())
         self._updated = True
         GObject.timeout_add(1000, self.update_units)
 
@@ -192,14 +192,14 @@ class RobotIndicator:
         r = subprocess.run(shlex.split(cmd), stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         # TODO: Use notify to return error messages
         if r.returncode != 0:
-            print(cmd+'\n'+r.stdout+'\n'+r.stderr)
+            print(cmd+'\n'+r.stdout.decode()+'\n'+r.stderr.decode())
 
     def ctrl_launch_unit(self, menu_item, operation, pkg, launch_file):
         cmd = "systemctl --user %s roslaunch@%s:%s.service" % (operation, pkg, launch_file)
         r = subprocess.run(shlex.split(cmd), stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         # TODO: Use notify to return error messages
         if r.returncode != 0:
-            print(cmd+'\n'+r.stdout+'\n'+r.stderr)
+            print(cmd+'\n'+r.stdout.decode()+'\n'+r.stderr.decode())
         self._updated = True
         GObject.timeout_add(1000, self.update_units)
         # GObject.idle_add(self.update_units,priority=GObject.PRIORITY_LOW)

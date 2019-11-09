@@ -157,6 +157,7 @@ include_directories(
 ## in contrast to setup.py, you can choose the destination
 install(PROGRAMS
   scripts/robot_indicator
+  scripts/robot_indicator_launch
   DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )
 
