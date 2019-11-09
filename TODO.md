@@ -38,7 +38,7 @@ roscorelaunch@.service unit.
 
 # external updates
 If a user runs `systemctl --user start roslaunch@pkg:file.launch` in a terminal
-it may take up to 30 seconds for the indicator to detect the change.
+it may take up to 15 seconds for the indicator to detect the change.
 
 This should probably be replaced with a 'Launch Units'>'Update' submenu item.
 It may be worth considering how the systemd unit can notify the indicator
@@ -47,6 +47,3 @@ instead of polling.
 # Default units
 Support for a list of default units in a config file so they don't disappear
 when a launch unit is stopped and disabled.
-
-# Launch interface
-GUI interface to start new roslaunch@.service units

@@ -1,0 +1,134 @@
+#!/usr/bin/python3
+import sys
+import os
+import signal
+import subprocess
+import shlex
+import binascii
+import collections
+import pathlib
+import rospkg
+
+import gi.repository
+gi.require_version('Gtk', '3.0')
+from gi.repository import Gtk
+gi.require_version('Gdk', '3.0')
+from gi.repository import Gdk
+gi.require_version('GLib', '2.0')
+from gi.repository import GLib
+gi.require_version('GObject', '2.0')
+from gi.repository import GObject
+
+class LaunchWindow(Gtk.Window):
+    def __init__(self):
+        self._rospack = rospkg.RosPack()
+        # List of valid package names
+        self._rospack_list = sorted(self._rospack.list())
+        # Selected package name
+        self._pkg = None
+        # Path to selected package
+        self._pkg_path = None
+        # launch files in selected package
+        self._launch_files = None
+        # Selected launch file
+        self._launch_file = None
+
+        # MVC setup
+        self._pkg_liststore = Gtk.ListStore(str)
+        self.init_pkg_liststore()
+
+        Gtk.Window.__init__(self, title="ROS Launcher")
+        self.set_type_hint(Gdk.WindowTypeHint.DIALOG)
+        self.set_border_width(20)
+
+        self._box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=6)
+        self.add(self._box)
+
+        self._pkg_label = Gtk.Label("ROS Package")
+        self._pkg_label.set_xalign(0)
+        self._box.pack_start(self._pkg_label, True, True, 0)
+
+        self._entrycompletion = Gtk.EntryCompletion()
+        self._entrycompletion.set_model(self._pkg_liststore)
+        self._entrycompletion.set_text_column(0)
+        self._entrycompletion.connect("match-selected",self.on_selected_pkg_update_launch)
+
+        self._entry = Gtk.Entry()
+        self._entry.set_completion(self._entrycompletion)
+        self._entry.set_max_width_chars(42)
+        self._entry.connect("focus-out-event",self.on_focus_update_launch)
+        self._box.pack_start(self._entry, True, True, 0)
+
+        self._pkg_label = Gtk.Label("Launch File")
+        self._pkg_label.set_xalign(0)
+        self._box.pack_start(self._pkg_label, True, True, 0)
+
+        self._launch_combo = Gtk.ComboBoxText()
+        self._launch_combo.connect("changed", self.on_change_set_launch)
+        self._box.pack_start(self._launch_combo, True, True, 0)
+
+        self._button_box = Gtk.ButtonBox(spacing=6)
+        self._box.pack_start(self._button_box, True, True, 0)
+
+        self._launch_button = Gtk.Button(label="Launch")
+        self._launch_button.set_sensitive(False)
+        self._launch_button.connect("clicked", self.on_launch)
+        self._button_box.pack_start(self._launch_button, True, True, 0)
+
+        self._cancel_button = Gtk.Button(label="Cancel")
+        self._cancel_button.connect("clicked", Gtk.main_quit)
+        self._button_box.pack_start(self._cancel_button, True, True, 0)
+
+    def init_pkg_liststore(self):
+        for pkg in self._rospack_list:
+            self._pkg_liststore.append([pkg])
+
+    def update_launch_files(self, pkg):
+        if pkg in self._rospack_list and pkg != self._pkg:
+            self._pkg = pkg
+
+            self._pkg_path = pathlib.Path(self._rospack.get_path(self._pkg))
+            self._launch_files = sorted(self._pkg_path.glob('**/*.launch'))
+            self._launch_combo.remove_all()
+            for launch_file in self._launch_files:
+                self._launch_combo.append_text(launch_file.name)
+            # Deactivate launch controls until if new package is selected
+            self._launch_button.set_sensitive(False)
+
+    def on_focus_update_launch(self, entry, focus):
+        pkg = entry.get_text()
+        self.update_launch_files(pkg)
+
+    def on_selected_pkg_update_launch(self, widget, model, i):
+        pkg = model.get_value(i,0)
+        self.update_launch_files(pkg)
+
+    def on_change_set_launch(self, combo):
+        self._launch_file = combo.get_active_text()
+        self._launch_button.set_sensitive(True)
+
+    def on_launch(self, button):
+        cmd = "systemctl --user start roslaunch@%s:%s.service"%(self._pkg, self._launch_file)
+        r = subprocess.run(shlex.split(cmd), stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        # TODO: Use notify to return error messages
+        if r.returncode != 0:
+            print(cmd+'\n'+r.stdout+'\n'+r.stderr)
+        Gtk.main_quit()
+
+class Launcher:
+    def __init__(self):
+        self._win = LaunchWindow()
+        self._win.connect("destroy", Gtk.main_quit)
+        self._win.show_all()
+
+    def start(self):
+        GLib.unix_signal_add(GLib.PRIORITY_DEFAULT, signal.SIGINT, self.stop)
+        Gtk.main()
+
+    def stop(self,*args):
+        Gtk.main_quit()
+        sys.exit(os.EX_OK)
+
+if __name__ == "__main__":
+    app = Launcher()
+    app.start()

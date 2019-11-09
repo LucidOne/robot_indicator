@@ -69,10 +69,16 @@ class RobotIndicator:
         separator_item.show()
         self._menu.append(separator_item)
 
-        launch_unit_item = Gtk.MenuItem("Launch Units")
-        launch_unit_item.set_sensitive(False)
-        launch_unit_item.show()
-        self._menu.append(launch_unit_item)
+        launch_units_item = Gtk.MenuItem("Launch Units")
+        launch_units_item.show()
+        self._menu.append(launch_units_item)
+
+        launch_unit_launch_item = Gtk.MenuItem("Launch...")
+        launch_unit_launch_item.connect("activate", self.ctrl_launch)
+        launch_unit_launch_item.show()
+        submenu = Gtk.Menu()
+        submenu.append(launch_unit_launch_item)
+        launch_units_item.set_submenu(submenu)
 
         # Items between "Launch Units" and SeparatorMenuItem
         # auto-populated by self.update_menu_launch_units()
@@ -172,14 +178,21 @@ class RobotIndicator:
     ################
     # Menu Controls
     ################
-    def ctrl_roscore(self,menu_item, operation):
+    def ctrl_roscore(self, menu_item, operation):
         cmd = "systemctl --user %s roscore.service" % (operation)
         r = subprocess.run(shlex.split(cmd))
         # TODO: Use notify to return error messages
         if r.returncode != 0:
             print(cmd+'\n'+r.stdout+'\n'+r.stderr)
         self._updated = True
-        GObject.idle_add(self.update_units,priority=GObject.PRIORITY_LOW)
+        GObject.timeout_add(1000, self.update_units)
+
+    def ctrl_launch(self, menu_item):
+        cmd = "rosrun robot_indicator robot_indicator_launch"
+        r = subprocess.run(shlex.split(cmd), stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        # TODO: Use notify to return error messages
+        if r.returncode != 0:
+            print(cmd+'\n'+r.stdout+'\n'+r.stderr)
 
     def ctrl_launch_unit(self, menu_item, operation, pkg, launch_file):
         cmd = "systemctl --user %s roslaunch@%s:%s.service" % (operation, pkg, launch_file)
@@ -188,7 +201,8 @@ class RobotIndicator:
         if r.returncode != 0:
             print(cmd+'\n'+r.stdout+'\n'+r.stderr)
         self._updated = True
-        GObject.idle_add(self.update_units,priority=GObject.PRIORITY_LOW)
+        GObject.timeout_add(1000, self.update_units)
+        # GObject.idle_add(self.update_units,priority=GObject.PRIORITY_LOW)
 
     ################
     # Update State Vectors
@@ -239,9 +253,9 @@ class RobotIndicator:
         GObject.idle_add(self.update_menu_launch_units,priority=GObject.PRIORITY_LOW)
 
     def run(self):
-        # Update every 30 seconds
+        # Update every 15 seconds
         self.update_units()
-        GObject.timeout_add(30000, self.run)
+        GObject.timeout_add(15000, self.run)
 
     def start(self):
         GLib.unix_signal_add(GLib.PRIORITY_DEFAULT, signal.SIGINT, self.stop)
