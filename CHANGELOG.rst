@@ -2,6 +2,11 @@
 Changelog for package robot_indicator
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+0.1.3 (2019-11-09)
+------------------
+* Install scripts/robot_indicator_launch
+* fixed error logging
+
 0.1.2 (2019-11-09)
 ------------------
 * Added "Launch..." submenu connected to `robot_indicator_launch` dialog
