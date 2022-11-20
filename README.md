@@ -6,10 +6,10 @@
 [robot_systemd](https://github.com/LucidOne/robot_systemd) to provide a GUI for
 Systemd based control of roslaunch units.
 
-![Indicator](https://raw.githubusercontent.com/LucidOne/robot_indicator/master/doc/indicator.png)
+![Indicator](doc/indicator.png)
 
-![Launch Package Selection](https://raw.githubusercontent.com/LucidOne/robot_indicator/master/doc/launch_package.png)
-![Launch UI](https://raw.githubusercontent.com/LucidOne/robot_indicator/master/doc/launch_ui.png)
+![Launch Package Selection](doc/launch_package.png)
+![Launch UI](doc/launch_ui.png)
 
 ## TL;DR
 ```bash
@@ -17,4 +17,7 @@ mkdir -p ~/.config/autostart
 cp `rospack find robot_indicator`/robot_indicator.desktop ~/.config/autostart/robot_indicator.desktop
 rosrun robot_indicator robot_indicator
 # or log out and log back in
+
+# or as a service with robot_systemd
+systemctl --user start roslaunch@robot_indicator:robot_indicator.service
 ```
