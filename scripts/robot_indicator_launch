@@ -44,7 +44,7 @@ class LaunchWindow(Gtk.Window):
         self._box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=6)
         self.add(self._box)
 
-        self._pkg_label = Gtk.Label("ROS Package")
+        self._pkg_label = Gtk.Label.new("ROS Package")
         self._pkg_label.set_xalign(0)
         self._box.pack_start(self._pkg_label, True, True, 0)
 
@@ -54,12 +54,14 @@ class LaunchWindow(Gtk.Window):
         self._entrycompletion.connect("match-selected", self.on_selected_pkg_update_launch)
 
         self._entry = Gtk.ComboBoxText.new_with_entry()
+        self._entry.set_model(self._pkg_liststore)
         self._entry.get_child().set_completion(self._entrycompletion)
         self._entry.get_child().set_max_width_chars(42)
-        self._entry.connect("focus-out-event", self.on_focus_update_launch)
+        self._entry.get_child().connect("focus-out-event", self.on_focus_update_launch)
+        self._entry.connect("changed", self.on_change_update_launch)
         self._box.pack_start(self._entry, True, True, 0)
 
-        self._pkg_label = Gtk.Label("Launch File")
+        self._pkg_label = Gtk.Label.new("Launch File")
         self._pkg_label.set_xalign(0)
         self._box.pack_start(self._pkg_label, True, True, 0)
 
@@ -99,8 +101,12 @@ class LaunchWindow(Gtk.Window):
         pkg = entry.get_text()
         self.update_launch_files(pkg)
 
+    def on_change_update_launch(self, combo):
+        pkg = combo.get_active_text()
+        self.update_launch_files(pkg)
+
     def on_selected_pkg_update_launch(self, widget, model, i):
-        pkg = model.get_value(i,0)
+        pkg = model.get_value(i, 0)
         self.update_launch_files(pkg)
 
     def on_change_set_launch(self, combo):
