@@ -47,12 +47,11 @@ class RobotIndicator:
         # TODO: config_file status_bullet
         self._status_bullet = ("◌", "○", "●", "◉")
 
-        self._menu = Gtk.Menu()
-        self._menu.set_double_buffered(True)
+        self._menu = Gtk.Menu.new()
 
         # Dynamic Menu Items
-        self._roscore_item = Gtk.MenuItem()
-        self._roscore_ctrl_item = Gtk.MenuItem()
+        self._roscore_item = Gtk.MenuItem.new()
+        self._roscore_ctrl_item = Gtk.MenuItem.new()
 
         self._running_units_checksum = None
         self._updated = False
@@ -64,35 +63,35 @@ class RobotIndicator:
         """Initialize indicator menu"""
         self._roscore_item.show()
         self._roscore_ctrl_item.show()
-        submenu = Gtk.Menu()
+        submenu = Gtk.Menu.new()
         submenu.append(self._roscore_ctrl_item)
         self._roscore_item.set_submenu(submenu)
         self._menu.append(self._roscore_item)
 
         # FIXME: DeprecationWarning
-        separator_item = Gtk.SeparatorMenuItem()
+        separator_item = Gtk.SeparatorMenuItem.new()
         separator_item.show()
         self._menu.append(separator_item)
 
-        launch_units_item = Gtk.MenuItem("Launch Units")
+        launch_units_item = Gtk.MenuItem.new_with_label("Launch Units")
         launch_units_item.show()
         self._menu.append(launch_units_item)
 
-        launch_unit_launch_item = Gtk.MenuItem("Launch...")
+        launch_unit_launch_item = Gtk.MenuItem.new_with_label("Launch...")
         launch_unit_launch_item.connect("activate", self.ctrl_launch)
         launch_unit_launch_item.show()
-        submenu = Gtk.Menu()
+        submenu = Gtk.Menu.new()
         submenu.append(launch_unit_launch_item)
         launch_units_item.set_submenu(submenu)
 
         # Items between "Launch Units" and SeparatorMenuItem
         # auto-populated by self.update_menu_launch_units()
 
-        separator_item = Gtk.SeparatorMenuItem()
+        separator_item = Gtk.SeparatorMenuItem.new()
         separator_item.show()
         self._menu.append(separator_item)
 
-        quit_item = Gtk.MenuItem("Quit")
+        quit_item = Gtk.MenuItem.new_with_label("Quit")
         quit_item.connect("activate", self.stop)
         quit_item.show()
         self._menu.append(quit_item)
@@ -106,12 +105,12 @@ class RobotIndicator:
         s = None
         if self._roscore_state:
             s = self._status_bullet[2]
-            self._indicator.set_icon("ros-active")
+            self._indicator.set_icon_full("ros-active", "ROSCore is active!")
             self._roscore_ctrl_item.set_label("Stop")
             self._roscore_ctrl_item.connect("activate", self.ctrl_roscore, "stop")
         else:
             s = self._status_bullet[0]
-            self._indicator.set_icon("ros-idle")
+            self._indicator.set_icon_full("ros-idle", "ROSCore is not active")
             self._roscore_ctrl_item.set_label("Start")
             self._roscore_ctrl_item.connect("activate", self.ctrl_roscore, "start")
         self._roscore_item.set_label("%s  Master [%s] " % (s, self._ros_master_uri))
@@ -139,8 +138,8 @@ class RobotIndicator:
         for pkg in pkgs:
             launch_files = self._launch_state[pkg].keys()
             for launch_file in launch_files:
-                launch_unit_ctrl_item = Gtk.MenuItem()
-                launch_unit_conf_item = Gtk.MenuItem()
+                launch_unit_ctrl_item = Gtk.MenuItem.new()
+                launch_unit_conf_item = Gtk.MenuItem.new()
 
                 # If the launch unit is 'Running' / 'Stopped'
                 if self._launch_state[pkg][launch_file][0]:
@@ -170,9 +169,9 @@ class RobotIndicator:
                 s = int("%d%d" % tuple(self._launch_state[pkg][launch_file]), 2)
                 b = self._status_bullet[s]
                 label = "%s  %s %s" % (b, pkg, launch_file)
-                launch_unit_item = Gtk.MenuItem(label)
+                launch_unit_item = Gtk.MenuItem.new_with_label(label)
 
-                submenu = Gtk.Menu()
+                submenu = Gtk.Menu.new()
                 submenu.append(launch_unit_ctrl_item)
                 submenu.append(launch_unit_conf_item)
                 launch_unit_item.set_submenu(submenu)
@@ -197,7 +196,7 @@ class RobotIndicator:
         if r.returncode != 0:
             print(cmd + "\n" + r.stdout.decode() + "\n" + r.stderr.decode())
         self._updated = True
-        GObject.timeout_add(1000, self.update_units)
+        GLib.timeout_add(1000, self.update_units)
 
     def ctrl_launch(self, menu_item):
         cmd = "rosrun robot_indicator robot_indicator_launch"
@@ -221,8 +220,8 @@ class RobotIndicator:
         if r.returncode != 0:
             print(cmd + "\n" + r.stdout.decode() + "\n" + r.stderr.decode())
         self._updated = True
-        GObject.timeout_add(1000, self.update_units)
-        # GObject.idle_add(self.update_units,priority=GObject.PRIORITY_LOW)
+        GLib.timeout_add(1000, self.update_units)
+        # GLib.idle_add(self.update_units,priority=GLib.PRIORITY_LOW)
 
     ################
     # Update State Vectors
@@ -272,13 +271,13 @@ class RobotIndicator:
 
         # Update menus
         self._updated = True
-        GObject.idle_add(self.update_menu_roscore, priority=GObject.PRIORITY_LOW)
-        GObject.idle_add(self.update_menu_launch_units, priority=GObject.PRIORITY_LOW)
+        GLib.idle_add(self.update_menu_roscore, priority=GLib.PRIORITY_LOW)
+        GLib.idle_add(self.update_menu_launch_units, priority=GLib.PRIORITY_LOW)
 
     def run(self):
         # Update every 15 seconds
         self.update_units()
-        GObject.timeout_add(15000, self.run)
+        GLib.timeout_add(15000, self.run)
 
     def start(self):
         GLib.unix_signal_add(GLib.PRIORITY_DEFAULT, signal.SIGINT, self.stop)

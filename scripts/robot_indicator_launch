@@ -49,7 +49,7 @@ class LaunchWindow(Gtk.Window):
         self._box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=6)
         self.add(self._box)
 
-        self._pkg_label = Gtk.Label("ROS Package")
+        self._pkg_label = Gtk.Label.new_with_label("ROS Package")
         self._pkg_label.set_xalign(0)
         self._box.pack_start(self._pkg_label, True, True, 0)
 
@@ -66,7 +66,7 @@ class LaunchWindow(Gtk.Window):
         self._entry.connect("focus-out-event", self.on_focus_update_launch)
         self._box.pack_start(self._entry, True, True, 0)
 
-        self._pkg_label = Gtk.Label("Launch File")
+        self._pkg_label = Gtk.Label.new_with_label("Launch File")
         self._pkg_label.set_xalign(0)
         self._box.pack_start(self._pkg_label, True, True, 0)
 
