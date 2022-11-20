@@ -19,5 +19,6 @@ rosrun robot_indicator robot_indicator
 # or log out and log back in
 
 # or as a service with robot_systemd
+systemctl --user enable roslaunch@robot_indicator:robot_indicator.service
 systemctl --user start roslaunch@robot_indicator:robot_indicator.service
 ```
