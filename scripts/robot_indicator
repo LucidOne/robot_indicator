@@ -68,7 +68,6 @@ class RobotIndicator:
         self._roscore_item.set_submenu(submenu)
         self._menu.append(self._roscore_item)
 
-        # FIXME: DeprecationWarning
         separator_item = Gtk.SeparatorMenuItem.new()
         separator_item.show()
         self._menu.append(separator_item)
@@ -113,7 +112,7 @@ class RobotIndicator:
             self._indicator.set_icon_full("ros-idle", "ROSCore is not active")
             self._roscore_ctrl_item.set_label("Start")
             self._roscore_ctrl_item.connect("activate", self.ctrl_roscore, "start")
-        self._roscore_item.set_label("%s  Master [%s] " % (s, self._ros_master_uri))
+        self._roscore_item.set_label(f"{s} Master [{self._ros_master_uri}] ")
 
     def update_menu_launch_units(self):
         p = 0
@@ -166,9 +165,9 @@ class RobotIndicator:
                     )
 
                 # Convert boolean list into an int
-                s = int("%d%d" % tuple(self._launch_state[pkg][launch_file]), 2)
+                s = int("{:d}{:d}".format(*self._launch_state[pkg][launch_file]), 2)
                 b = self._status_bullet[s]
-                label = "%s  %s %s" % (b, pkg, launch_file)
+                label = f"{b} {pkg} {launch_file}"
                 launch_unit_item = Gtk.MenuItem.new_with_label(label)
 
                 submenu = Gtk.Menu.new()
@@ -190,11 +189,11 @@ class RobotIndicator:
     # Menu Controls
     ################
     def ctrl_roscore(self, menu_item, operation):
-        cmd = "systemctl --user %s roscore.service" % (operation)
+        cmd = f"systemctl --user {operation} roscore.service"
         r = subprocess.run(shlex.split(cmd))
         # TODO: Use notify to return error messages
         if r.returncode != 0:
-            print(cmd + "\n" + r.stdout.decode() + "\n" + r.stderr.decode())
+            print(cmd, r.stdout.decode(), r.stderr.decode(), sep="\n")
         self._updated = True
         GLib.timeout_add(1000, self.update_units)
 
@@ -205,20 +204,16 @@ class RobotIndicator:
         )
         # TODO: Use notify to return error messages
         if r.returncode != 0:
-            print(cmd + "\n" + r.stdout.decode() + "\n" + r.stderr.decode())
+            print(cmd, r.stdout.decode(), r.stderr.decode(), sep="\n")
 
     def ctrl_launch_unit(self, menu_item, operation, pkg, launch_file):
-        cmd = "systemctl --user %s roslaunch@%s:%s.service" % (
-            operation,
-            pkg,
-            launch_file,
-        )
+        cmd = f"systemctl --user {operation} roslaunch@{pkg}:{launch_file}.service"
         r = subprocess.run(
             shlex.split(cmd), stdout=subprocess.PIPE, stderr=subprocess.PIPE
         )
         # TODO: Use notify to return error messages
         if r.returncode != 0:
-            print(cmd + "\n" + r.stdout.decode() + "\n" + r.stderr.decode())
+            print(cmd, r.stdout.decode(), r.stderr.decode(), sep="\n")
         self._updated = True
         GLib.timeout_add(1000, self.update_units)
         # GLib.idle_add(self.update_units,priority=GLib.PRIORITY_LOW)
