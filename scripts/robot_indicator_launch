@@ -51,12 +51,12 @@ class LaunchWindow(Gtk.Window):
         self._entrycompletion = Gtk.EntryCompletion()
         self._entrycompletion.set_model(self._pkg_liststore)
         self._entrycompletion.set_text_column(0)
-        self._entrycompletion.connect("match-selected",self.on_selected_pkg_update_launch)
+        self._entrycompletion.connect("match-selected", self.on_selected_pkg_update_launch)
 
-        self._entry = Gtk.Entry()
-        self._entry.set_completion(self._entrycompletion)
-        self._entry.set_max_width_chars(42)
-        self._entry.connect("focus-out-event",self.on_focus_update_launch)
+        self._entry = Gtk.ComboBoxText.new_with_entry()
+        self._entry.get_child().set_completion(self._entrycompletion)
+        self._entry.get_child().set_max_width_chars(42)
+        self._entry.connect("focus-out-event", self.on_focus_update_launch)
         self._box.pack_start(self._entry, True, True, 0)
 
         self._pkg_label = Gtk.Label("Launch File")
